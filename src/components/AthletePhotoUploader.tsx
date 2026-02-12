@@ -1,59 +1,53 @@
 import React, { useEffect, useState, memo } from 'react';
 import { AthleteSelector, Athlete } from './AthleteSelector';
+import { RaceSelector, Race } from './RaceSelector';
 import { PhotoDropzone } from './PhotoDropzone';
 import { StatusIndicator, UploadStatus } from './StatusIndicator';
 import { RotateCcw, Save } from 'lucide-react';
 // Mock Data
 const MOCK_ATHLETES: Athlete[] = [
 {
-  id: 'ATH-1042',
-  name: 'Marcus Johnson',
-  existingPhoto:
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+  id: 'ATH-1001',
+  name: 'Arpita Bhat'
 },
 {
-  id: 'ATH-1087',
-  name: 'Serena Williams'
+  id: 'ATH-1002',
+  name: 'Deepak Kumar'
 },
 {
-  id: 'ATH-2091',
-  name: 'David Chen',
-  existingPhoto:
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+  id: 'ATH-1003',
+  name: 'Madhu Bala'
 },
 {
-  id: 'ATH-3012',
-  name: 'Sarah Miller'
+  id: 'ATH-1004',
+  name: 'Niyati Kotian'
 },
 {
-  id: 'ATH-3045',
-  name: 'James Wilson'
+  id: 'ATH-1005',
+  name: 'Uttam Mallya'
+}];
+
+const MOCK_RACES: Race[] = [
+{
+  id: 'RACE-01',
+  name: 'Bangalore Ultra 2025'
 },
 {
-  id: 'ATH-4102',
-  name: 'Emily Davis',
-  existingPhoto:
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+  id: 'RACE-02',
+  name: 'Bengaluru 10K Challenge 2025'
 },
 {
-  id: 'ATH-5021',
-  name: 'Michael Brown'
+  id: 'RACE-03',
+  name: 'Kodagu Monsoon Half Marathon 2025'
 },
 {
-  id: 'ATH-6098',
-  name: 'Jessica Taylor'
-},
-{
-  id: 'ATH-7123',
-  name: 'Robert Anderson'
-},
-{
-  id: 'ATH-8234',
-  name: 'Lisa Thomas'
+  id: 'RACE-04',
+  name: 'Wipro Bengaluru Marathon 2025'
 }];
 
 export function AthletePhotoUploader() {
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
+  const [selectedRace, setSelectedRace] = useState<Race | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<UploadStatus>('idle');
@@ -68,15 +62,19 @@ export function AthletePhotoUploader() {
   }, [previewUrl]);
   const handleAthleteSelect = (athlete: Athlete) => {
     setSelectedAthlete(athlete);
+    setSelectedRace(null);
     setUploadedFile(null);
     setStatus('idle');
     if (athlete.existingPhoto) {
       setPreviewUrl(athlete.existingPhoto);
-      setStatus('no-photo'); // Technically no *new* photo uploaded yet
+      setStatus('no-photo');
     } else {
       setPreviewUrl(null);
       setStatus('no-photo');
     }
+  };
+  const handleRaceSelect = (race: Race) => {
+    setSelectedRace(race);
   };
   const handleFileSelect = (file: File) => {
     setUploadedFile(file);
@@ -85,7 +83,7 @@ export function AthletePhotoUploader() {
     setStatus('pending');
   };
   const handleSave = () => {
-    if (!selectedAthlete || !uploadedFile) return;
+    if (!selectedAthlete || !selectedRace || !uploadedFile) return;
     setIsSaving(true);
     // Simulate API call
     setTimeout(() => {
@@ -96,13 +94,18 @@ export function AthletePhotoUploader() {
   };
   const handleClear = () => {
     setSelectedAthlete(null);
+    setSelectedRace(null);
     setUploadedFile(null);
     setPreviewUrl(null);
     setStatus('idle');
     setIsSaving(false);
   };
   const isSaveDisabled =
-  !selectedAthlete || !uploadedFile || isSaving || status === 'success';
+  !selectedAthlete ||
+  !selectedRace ||
+  !uploadedFile ||
+  isSaving ||
+  status === 'success';
   const showClear = selectedAthlete !== null || uploadedFile !== null;
   return (
     <div className="w-full max-w-lg bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -113,7 +116,7 @@ export function AthletePhotoUploader() {
             Athlete Photo Uploader
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Upload or update an athlete's profile photo
+            Upload or update an athlete's race photos
           </p>
         </div>
 
@@ -125,12 +128,24 @@ export function AthletePhotoUploader() {
             onSelect={handleAthleteSelect} />
 
 
+          {selectedAthlete &&
+          <RaceSelector
+            races={MOCK_RACES}
+            selectedRace={selectedRace}
+            onSelect={handleRaceSelect} />
+
+          }
+
           <PhotoDropzone
             onFileSelect={handleFileSelect}
             previewUrl={previewUrl}
-            disabled={!selectedAthlete}
+            disabled={!selectedAthlete || !selectedRace}
             isExistingPhoto={!!selectedAthlete?.existingPhoto && !uploadedFile} />
 
+
+          <p className="text-xs text-gray-400">
+            You can upload up to 5 photos at a time. JPG or PNG only.
+          </p>
 
           {status !== 'idle' && <StatusIndicator status={status} />}
         </div>
