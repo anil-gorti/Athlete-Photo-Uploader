@@ -1,4 +1,4 @@
-Athlete Photo Uploader
+# WONE — Admin Athlete Photo Uploader
 
 A lightweight internal admin tool for attaching profile photos to athletes in a structured database.
 
